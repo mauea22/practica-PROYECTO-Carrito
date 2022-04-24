@@ -29,7 +29,7 @@ function agregarCursos(e) {
     //e.target se refiere elemento clickado (en este caso el tag <a></a> dentro del <div id="lista-cursos"></div>)
     //si ese elemento contiene dentro de sus clases (agregar-carrito) ejecuto el if
     if (e.target.classList.contains('agregar-carrito')){
-        //estoy subiendo al div padre donde está el elemento para tener acceso a los datos del curso 
+        //estoy subiendo al div que contiene todos los datos donde está el elemento para tener acceso a ellos
         const cursoSeleccionado = e.target.parentElement.parentElement;
         //llamo a la función que lee los datos y le paso la variable que contiene el elemento raíz 
         leerDatosCurso(cursoSeleccionado);
@@ -54,8 +54,24 @@ function leerDatosCurso(curso){
         cantidad: 1
     }
 
-    //agrega elementos al arreglo de carrito
-    articulosCarrito = [...articulosCarrito,infoCurso];
+    //revisa si un elemento ya existe en el carrito
+    const existe = articulosCarrito.some( curso => curso.id === infoCurso.id);
+
+    if (existe) {
+        // Actualizamos la cantidad
+        const cursos = articulosCarrito.map(curso => {
+            if(curso.id === infoCurso.id){
+                curso.cantidad++;
+                return curso; //retorna el objeto actualizado
+            }else{
+                return curso;// retorna los objetos que no son duplicados
+            }
+        });
+        articulosCarrito = [...cursos];
+    } else{
+        //agrega elementos al arreglo de carrito
+        articulosCarrito = [...articulosCarrito,infoCurso];
+    }
 
     carritoHTML();
 }
@@ -65,15 +81,21 @@ function leerDatosCurso(curso){
 function carritoHTML(){
     //limpiar el HTML
     limpiarHTML();
-
     // Recorre el carrito y genera el Html
     articulosCarrito.forEach(curso =>{
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>
-                ${curso.titulo}
+                <img src="${curso.imagen}" width="100">
             </td>
-        `;
+            <td>${curso.titulo}</td>
+            <td>${curso.precio}</td>
+            <td>${curso.cantidad}</td>
+            <td>
+                <a href="#" class="borrar-curso" data-id="${curso.id}" > X </a>
+            </td>
+            `;
+            //el ultimo td es la x para borrar cursos del carrito la class ya esta definida en custom.css
 
         //agrega el HTML del carrito en el tbody
         contenedorCarrito.appendChild(row);
